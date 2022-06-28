@@ -11,13 +11,14 @@ import sys
 from influxdb import InfluxDBClient
 import RPi.GPIO as GPIO
 import subprocess
+from machine import Pin
 
 
-
-PUMP_gpio = 21
-LAMP_gpio = 20
-contact1_gpio = 16
-contact2_gpio = 12
+wattersensor_gpio= 6 #watersensor cable
+relais4_gpio = 5 #Pump
+relais3_gpio = 4 #Ring3
+relais2_gpio = 3 #Ring2
+relais1_gpio = 2 #Ring1
 dev_path = '/sys/bus/w1/devices/'
 dev_Dach = glob.glob(dev_path + '28-0316611d8bff')[0]
 dev_Vorlauf = glob.glob(dev_path + '28-031660882fff')[0]
@@ -42,9 +43,20 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 count_work=0
-count_dont=0
-temp_Soll=2
 
+# Initialisierung von GPIO25 als Ausgang
+pump_onboard = Pin(5, Pin.OUT, value=0)
+
+# Initialisierung von GPIO6 als Eingang
+btn = Pin(6, Pin.IN, Pin.PULL_DOWN)
+
+# Taster-Funktion
+def on_pressed(timer):
+    pump_onboard.toggle()
+    print('pressed')
+
+# Taster-Auslösung
+btn.irq(trigger=Pin.IRQ_RISING, handler=on_pressed)
 
 #print(count_work)
 def get_temp():
@@ -57,29 +69,12 @@ def get_temp():
     temp_Vorlauf=0
 
     for t in range(1):
-        tempfile_Vorlauf = open(Vorlauf)
-        tempfile_Nachlauf = open(Nachlauf)
-        tempfile_Dach = open(Dach)
+
         tempfile_Luft = open(Luft)
-        text_Vorlauf = tempfile_Vorlauf.read() 
-        text_Nachlauf = tempfile_Nachlauf.read() 
-        text_Dach = tempfile_Dach.read() 
         text_Luft = tempfile_Luft.read() 
         tempfile_Luft.close() 
-        tempfile_Vorlauf.close() 
-        tempfile_Nachlauf.close() 
-        tempfile_Dach.close() 
         tline_Luft = text_Luft.split("\n")[1] # the second line contains temperature
-        tline_Vorlauf = text_Vorlauf.split("\n")[1] # the second line contains temperature
-        tline_Nachlauf = text_Nachlauf.split("\n")[1] # the second line contains temperature
-        tline_Dach = text_Dach.split("\n")[1] # the second line contains temperature
         tdata_Luft = tline_Luft.split(" ")[9] # position 9 contains temparature value
-        tdata_Vorlauf = tline_Vorlauf.split(" ")[9] # position 9 contains temparature value
-        tdata_Nachlauf = tline_Nachlauf.split(" ")[9] # position 9 contains temparature value
-        tdata_Dach = tline_Dach.split(" ")[9] # position 9 contains temparature value
-        temp_Dach  += float(tdata_Dach[2:])/1000
-        temp_Vorlauf  += float(tdata_Vorlauf[2:])/1000
-        temp_Nachlauf  += float(tdata_Nachlauf[2:])/1000
         temp_Luft  += float(tdata_Luft[2:])/1000
         temp_Delta=temp_Dach-temp_Vorlauf
    
