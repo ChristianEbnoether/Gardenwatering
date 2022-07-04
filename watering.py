@@ -13,7 +13,6 @@ from influxdb import InfluxDBClient
 import subprocess
 import schedule
 
-GPIO.cleanup()
 
 wattersensor_gpio= 6 #watersensor cable
 relais4_gpio = 5 #Pump
