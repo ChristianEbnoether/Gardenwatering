@@ -18,3 +18,10 @@ pip install schedule
 pip install requests
 
 
+
+
+
+
+because there is actuely no cable between the Relaisboard and the Pump in place i need to steer a SHELLY1 (r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=on"))
+
+:-) hopefully i can change this in a few weeks....
