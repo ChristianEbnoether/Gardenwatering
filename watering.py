@@ -36,7 +36,7 @@ dbname= 'water'
 session='garden'
 
 
-oGPIO.setmode(GPIO.BCM) 
+GPIO.setmode(GPIO.BCM) 
 GPIO.setwarnings(False) # Ignore warning for now
 
 GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
@@ -46,7 +46,8 @@ GPIO.setup(4, GPIO.OUT)
 GPIO.setup(5, GPIO.OUT)
 
 
-wet=True
+global wet
+wet=False
 ring1=False
 ring2=False
 ring3=False
@@ -62,18 +63,12 @@ def get_sensor_wet():
     for w in range(1):
         if GPIO.input(6) ==False:
             print("kein wassern (6)")
-            wet==False
-            print(f"ring1 {ring1} ")
-            print(f"ring2 {ring2} ")
-            print(f"ring3 {ring3} ")
-            print(f"pump {pump} ")
+            wet = False
+            print(f"wet {wet} ")
         if GPIO.input(6) ==True:
             print("wassern (6)")
-            wet==True
-            print(f"ring1 {ring1} ")
-            print(f"ring2 {ring2} ")
-            print(f"ring3 {ring3} ")
-            print(f"pump {pump} ")
+            wet = True
+            print(f"wet {wet} ")
 
 def influx():
     global wet
@@ -84,10 +79,6 @@ def influx():
     for t in range(1):
 
         timestamp=datetime.datetime.utcnow().isoformat()
-        print(f"ring1 {ring1} ")
-        print(f"ring2 {ring2} ")
-        print(f"ring3 {ring3} ")
-        print(f"pump {pump} ")
         print(f"wet {wet} ")
         datapoints = [
             {
@@ -105,35 +96,63 @@ client = InfluxDBClient(host, port, user, password, dbname)
 
 
 
-def task():
-    print("Do task now")
+def water_ring1():
+    print("Do ring1 now")
     global wet    
     global ring1    
+    global pump    
+    if wet==False:
+        for i in range(300):
+            print(i)
+            i+=i
+            GPIO.output(5, GPIO.HIGH) and GPIO.output(2, GPIO.HIGH)
+            print(f"wet {wet} Pump and Ring 1 Run")
+            ring1=True
+            print(f"ring1 {ring1} ")
+            print(f"pump {pump} ")
+            print(f"wet {wet} ")
+            time.sleep(1)
+
+def water_ring2():
+    #print("Do ring2 now")
+    global wet    
     global ring2  
+    global pump    
+    if wet==False:
+        GPIO.output(5, GPIO.HIGH) and GPIO.output(3, GPIO.HIGH)
+        #print(f"wet {wet} Pump and Ring 3 Run")
+        ring1=True
+        #print(f"ring2 {ring2} ")
+        #print(f"pump {pump} ")
+        #print(f"wet {wet} ")
+        time.sleep(1)
+
+def water_ring3():
+    #print("Do ring3 now")
+    global wet    
     global ring3  
     global pump    
-    if wet==True:
-        GPIO.output(5, GPIO.HIGH) and GPIO.output(2, GPIO.HIGH)
-        print(f"wet {wet} Pump and Ring 1 Run")
-        ring1==True
-        print(f"ring1 {ring1} ")
-        print(f"ring2 {ring2} ")
-        print(f"ring3 {ring3} ")
-        print(f"pump {pump} ")
-        time.sleep(5)
+    if wet==False:
+        GPIO.output(5, GPIO.HIGH) and GPIO.output(4, GPIO.HIGH)
+     #   print(f"wet {wet} Pump and Ring 3 Run")
+        ring1=True
+      #  print(f"ring3 {ring3} ")
+      #  print(f"pump {pump} ")
+      #  print(f"wet {wet} ")
+        time.sleep(1)
 
-
-
-schedule.every().day.at("19:45").do(task)
+schedule.every().day.at("21:59").do(water_ring1)
+schedule.every().day.at("19:55").do(water_ring2)
+schedule.every().day.at("20:15").do(water_ring3)
 
 while True:
     get_sensor_wet()
     print(f"ring1 {ring1} ")
-    print(f"ring2 {ring2} ")
-    print(f"ring3 {ring3} ")
+    #print(f"ring2 {ring2} ")
+    #print(f"ring3 {ring3} ")
     print(f"pump {pump} ")
+    print(f"wet {wet} ")
     datapoints=influx()
     bResult=client.write_points(datapoints)
     schedule.run_pending()
-    time.sleep(5)
-
+    time.sleep(1)
