@@ -12,25 +12,20 @@ import sys
 from influxdb import InfluxDBClient
 import subprocess
 import schedule
+import requests
 
-
-wattersensor_gpio= 6 #watersensor cable
-relais4_gpio = 5 #Pump
-relais3_gpio = 4 #Ring3
-relais2_gpio = 3 #Ring2
-relais1_gpio = 2 #Ring1
-
-
+GPIO.cleanup()
 
 wattersensor_gpio= 6 #watersensor cable
 relais4_gpio = 5 #Pump
 relais3_gpio = 4 #Ring3
 relais2_gpio = 3 #Ring2
 relais1_gpio = 2 #Ring1
+
 host = '192.168.1.10'
 port = 8086
-user = [user]
-password = [password]
+user = '[user]'
+password = '[pw]'
 dbname= 'water'
 session='garden'
 
@@ -55,19 +50,13 @@ pump=False
 
 def get_sensor_wet():
     global wet    
-    global ring1    
-    global ring2  
-    global ring3  
-    global pump  
     for w in range(1):
-        if GPIO.input(6) ==False:
-            print("kein wassern (6)")
-            wet = False
-            print(f"wet {wet} ")
         if GPIO.input(6) ==True:
             print("wassern (6)")
+            wet = False
+        if GPIO.input(6) ==False:
+            print("kein wassern (6)")
             wet = True
-            print(f"wet {wet} ")
 
 def influx():
     global wet
@@ -78,7 +67,6 @@ def influx():
     for t in range(1):
 
         timestamp=datetime.datetime.utcnow().isoformat()
-        print(f"wet {wet} ")
         datapoints = [
             {
                 "measurement": session,
@@ -101,56 +89,69 @@ def water_ring1():
     global ring1    
     global pump    
     if wet==False:
-        for i in range(300):
-            print(i)
-            i+=i
-            GPIO.output(5, GPIO.HIGH) and GPIO.output(2, GPIO.HIGH)
-            print(f"wet {wet} Pump and Ring 1 Run")
-            ring1=True
-            print(f"ring1 {ring1} ")
-            print(f"pump {pump} ")
-            print(f"wet {wet} ")
-            time.sleep(1)
+        GPIO.output(5, GPIO.HIGH) and GPIO.output(2, GPIO.HIGH)
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=on")
+        print('Status Code:')
+        print(r.status_code)
+        ring1=True
+        print(f"wet {wet} Pump {pump} and Ring 1 {ring1} Run")
+        time.sleep(30)
+        GPIO.output(5, GPIO.LOW) and GPIO.output(2, GPIO.LOW)
+        print(f"wet {wet} Pump {pump} and Ring 1 {ring1} not Run")
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=off")
+        print('Status Code:')
+        print(r.status_code)
+        ring1=False
 
 def water_ring2():
-    #print("Do ring2 now")
+    print("Do ring2 now")
     global wet    
-    global ring2  
+    global ring2    
     global pump    
     if wet==False:
         GPIO.output(5, GPIO.HIGH) and GPIO.output(3, GPIO.HIGH)
-        #print(f"wet {wet} Pump and Ring 3 Run")
-        ring1=True
-        #print(f"ring2 {ring2} ")
-        #print(f"pump {pump} ")
-        #print(f"wet {wet} ")
-        time.sleep(1)
-
+        ring2=True
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=on")
+        print('Status Code:')
+        print(r.status_code)
+        print(f"wet {wet} Pump {pump} and Ring 2 {ring2} Run")
+        time.sleep(30)
+        GPIO.output(5, GPIO.LOW) and GPIO.output(3, GPIO.LOW)
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=off")
+        print('Status Code:')
+        print(r.status_code)
+        print(f"wet {wet} Pump {pump} and Ring 2 {ring2} Run")
+        ring2=False
+        
+        
+        
 def water_ring3():
-    #print("Do ring3 now")
+    print("Do ring3 now")
     global wet    
-    global ring3  
+    global ring3    
     global pump    
     if wet==False:
         GPIO.output(5, GPIO.HIGH) and GPIO.output(4, GPIO.HIGH)
-     #   print(f"wet {wet} Pump and Ring 3 Run")
-        ring1=True
-      #  print(f"ring3 {ring3} ")
-      #  print(f"pump {pump} ")
-      #  print(f"wet {wet} ")
-        time.sleep(1)
-
-schedule.every().day.at("21:59").do(water_ring1)
+        ring3=True
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=on")
+        print('Status Code:')
+        print(r.status_code)
+        print(f"wet {wet} Pump {pump} and Ring 3 {ring3} Run")
+        time.sleep(30)
+        GPIO.output(5, GPIO.LOW) and GPIO.output(4, GPIO.LOW)
+        r = requests.get("http://[user]:[password]@192.168.97.254/relay/0?turn=off")
+        print('Status Code:')
+        print(r.status_code)
+        print(f"wet {wet} Pump {pump} and Ring 3 {ring3} Run")
+        ring3=False
+        
+   
+schedule.every().day.at("22:58").do(water_ring1)
 schedule.every().day.at("19:55").do(water_ring2)
 schedule.every().day.at("20:15").do(water_ring3)
 
 while True:
     get_sensor_wet()
-    print(f"ring1 {ring1} ")
-    #print(f"ring2 {ring2} ")
-    #print(f"ring3 {ring3} ")
-    print(f"pump {pump} ")
-    print(f"wet {wet} ")
     datapoints=influx()
     bResult=client.write_points(datapoints)
     schedule.run_pending()
