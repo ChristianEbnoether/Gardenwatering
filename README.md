@@ -11,5 +11,5 @@ sudo apt install python3-pip
 
 pip3 install influxdb
 
-pip install micropython-machine
+sudo apt-get install python3-rpi.gpio python3-rpi.gpio
 
