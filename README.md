@@ -1,5 +1,5 @@
 # Gardenwatering
-configuration to open and close the contacts on the relais board to steer timebased
+## configuration to open and close the contacts on the relais board to steer timebased
 
 
 start first with 
