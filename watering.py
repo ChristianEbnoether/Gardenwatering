@@ -111,9 +111,7 @@ def water_ring1():
         GPIO.setmode(GPIO.BCM)
         GPIO.output(2, GPIO.HIGH)
         GPIO.output(3, GPIO.HIGH)
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=on")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring1 = True
         print(f"wet {wet} Pump {pump} and Ring 1 {ring1} Run")
         time.sleep(240)
@@ -122,9 +120,7 @@ def water_ring1():
         time.sleep(2)
         GPIO.output(2, GPIO.LOW)
         print(f"wet {wet} Pump {pump} and Ring 1 {ring1} not Run")
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=off")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring1 = False
     else:
         pass
@@ -139,9 +135,7 @@ def water_ring2():
         GPIO.setmode(GPIO.BCM)
         GPIO.output(2, GPIO.HIGH)
         GPIO.output(4, GPIO.HIGH)
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=on")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring2 = True
         print(f"wet {wet} Pump {pump} and Ring 2 {ring2} Run")
         time.sleep(240)
@@ -150,9 +144,7 @@ def water_ring2():
         time.sleep(2)
         GPIO.output(2, GPIO.LOW)
         print(f"wet {wet} Pump {pump} and Ring 2 {ring2} not Run")
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=off")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring2 = False
     else:
         pass
@@ -168,9 +160,7 @@ def water_ring3():
         GPIO.setmode(GPIO.BCM)
         GPIO.output(2, GPIO.HIGH)
         GPIO.output(5, GPIO.HIGH)
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=on")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring3 = True
         print(f"wet {wet} Pump {pump} and Ring 3 {ring3} Run")
         time.sleep(180)
@@ -179,9 +169,7 @@ def water_ring3():
         time.sleep(2)
         GPIO.output(2, GPIO.LOW)
         print(f"wet {wet} Pump {pump} and Ring 3 {ring3} not Run")
-        #r = requests.get("http://admin:tsgebch1@192.168.97.254/relay/0?turn=off")
-        #print('Status Code:')
-        #print(r.status_code)
+
         ring3 = False
     else:
         pass
